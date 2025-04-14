@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Análisis IA</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: #f4f6fa;
+            padding: 10px 20px;
+            border-radius: 8px;
+        }
+        .logo-section {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .logo {
+            height: 40px;
+        }
+        .user-section {
+            position: relative;
+        }
+        .user-button {
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 4px;
+            transition: background-color 0.3s;
+        }
+        .user-button:hover {
+            background-color: rgba(0, 0, 0, 0.05);
+        }
+        .user-menu {
+            display: none;
+            position: absolute;
+            top: 100%;
+            right: 0;
+            width: 250px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            margin-top: 8px;
+            z-index: 1000;
+            overflow: hidden;
+        }
+        .user-menu.show {
+            display: block;
+        }
+        .user-menu-header {
+            padding: 16px;
+            background: #f8f9fa;
+            border-bottom: 1px solid #eee;
+        }
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .user-avatar {
+            font-size: 24px;
+            background: #e9ecef;
+            width: 40px;
+            height: 40px;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .user-name {
+            font-weight: bold;
+            color: #333;
+        }
+        .user-role {
+            font-size: 12px;
+            color: #666;
+        }
+        .user-menu-items {
+            padding: 8px 0;
+        }
+        .user-menu-items a {
+            display: flex;
+            align-items: center;
+            padding: 12px 16px;
+            color: #333;
+            text-decoration: none;
+            transition: background-color 0.3s;
+        }
+        .user-menu-items a:hover {
+            background-color: #f8f9fa;
+        }
+        .menu-icon {
+            margin-right: 12px;
+            font-size: 16px;
+            width: 20px;
+            text-align: center;
+        }
+        .menu-divider {
+            height: 1px;
+            background: #eee;
+            margin: 8px 0;
+        }
+        .logout {
+            color: #dc3545 !important;
+        }
+
+        /* Estilos para el chat */
+        .chat-container {
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 20px;
+            height: calc(100vh - 160px); /* Altura limitada */
+            display: flex;
+            flex-direction: column;
+        }
+
+        .chat-title {
+            font-size: 32px;
+            margin-bottom: 30px;
+            color: #333;
+        }
+
+        .chat-box {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            margin-bottom: 20px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            min-height: 0; /* Importante para que funcione el scroll */
+        }
+
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            margin-bottom: 20px;
+            padding: 10px;
+            max-height: calc(100vh - 300px); /* Altura máxima con scroll */
+        }
+
+        .message {
+            margin-bottom: 20px;
+            padding: 15px;
+            border-radius: 12px;
+            background: #f8f9fa;
+            max-width: 80%;
+            word-wrap: break-word; /* Para que el texto no se desborde */
+        }
+
+        .message.user {
+            background: #f4f6fa;
+            margin-left: auto;
+        }
+
+        .message.ai {
+            background: white;
+            border: 1px solid #e9ecef;
+            margin-right: auto;
+        }
+
+        .message.warning {
+            border-left: 4px solid #dc3545;
+        }
+
+        .message-content {
+            font-size: 16px;
+            line-height: 1.6;
+            color: #333;
+            white-space: pre-wrap;
+            font-family: 'Consolas', monospace;
+        }
+
+        .message-content h2 {
+            margin: 10px 0;
+            color: #2c3e50;
+        }
+
+        .message-content ul {
+            margin: 10px 0;
+            padding-left: 20px;
+        }
+
+        .message-content li {
+            margin: 5px 0;
+        }
+
+        .divider {
+            border-top: 1px solid #eee;
+            margin: 15px 0;
+        }
+
+        .status-icon {
+            font-size: 1.2em;
+            margin-right: 8px;
+        }
+
+        .value-display {
+            background: #f8f9fa;
+            padding: 8px 12px;
+            border-radius: 6px;
+            margin: 8px 0;
+        }
+
+        .warning-text {
+            color: #dc3545;
+            font-weight: bold;
+        }
+
+        .section-title {
+            font-weight: bold;
+            color: #2c3e50;
+            margin: 15px 0 10px 0;
+        }
+
+        .chat-input {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: white;
+            padding: 15px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .chat-input input {
+            flex: 1;
+            padding: 12px;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            font-size: 16px;
+        }
+
+        .chat-input button {
+            padding: 12px 24px;
+            background: #0d6efd;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .chat-input button:hover {
+            background: #0b5ed7;
+        }
+
+        .warning-icon {
+            color: #dc3545;
+            margin-right: 10px;
+        }
+
+        .bot-message {
+            white-space: normal;
+            font-family: 'Courier New', monospace;
+            line-height: 1.4;
+            background-color: #f8f9fa;
+            border-radius: 10px;
+            padding: 12px 15px;
+            max-width: 90%;
+            position: relative;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+        }
+        
+        .section-title {
+            color: #0056b3;
+            font-weight: bold;
+            background-color: #e7f1ff;
+            padding: 2px 4px;
+            border-radius: 4px;
+        }
+        
+        .box-top, .box-bottom, .box-side, .box-mid, .box-line {
+            color: #6c757d;
+            font-weight: normal;
+        }
+        
+        .critical { color: #dc3545; font-weight: bold; }
+        .warning { color: #fd7e14; font-weight: bold; }
+        .normal { color: #28a745; font-weight: bold; }
+        
+        .emoji {
+            font-size: 1.2em;
+            margin-right: 2px;
+        }
+        
+        .sensor-value {
+            color: #0056b3;
+            font-weight: bold;
+        }
+        
+        .sensor-unit {
+            color: #6c757d;
+            font-size: 0.9em;
+        }
+        
+        .messages-container {
+            height: 500px;
+            overflow-y: auto;
+            padding: 15px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .user-message {
+            background-color: #e7f1ff;
+            padding: 10px 15px;
+            border-radius: 18px;
+            margin: 5px 0 15px auto;
+            max-width: 70%;
+            text-align: right;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+            font-weight: 500;
+        }
+
+        .separator {
+            border: 0;
+            height: 1px;
+            background: linear-gradient(to right, transparent, #666, transparent);
+            margin: 10px 0;
+        }
+        .emoji {
+            font-size: 1.2em;
+            display: inline-block;
+            vertical-align: middle;
+            margin: 0 2px;
+        }
+        .status-CRÍTICO { color: #dc3545; font-weight: bold; }
+        .status-ALERTA { color: #ffc107; font-weight: bold; }
+        .status-NORMAL { color: #28a745; font-weight: bold; }
+        .value { font-weight: bold; color: #0056b3; }
+        .unit { color: #666; }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="logo-section">
+            <img src="logo.png" alt="logo" class="logo" />
+            <h1>InnovaFactory Assistant</h1>
+        </div>
+        <div class="user-section">
+            <div class="user-button" onclick="toggleUserMenu()">
+                👤 Usuario
+            </div>
+            <div class="user-menu">
+                <div class="user-menu-header">
+                    <div class="user-info">
+                        <span class="user-avatar">👤</span>
+                        <div>
+                            <div class="user-name">Mariola Martínez</div>
+                            <div class="user-role">Técnico de Mantenimiento</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="user-menu-items">
+                    <a href="#"><i class="menu-icon">👤</i> Mi Perfil</a>
+                    <a href="#"><i class="menu-icon">📋</i> Mis Tareas</a>
+                    <a href="#"><i class="menu-icon">🔧</i> Órdenes de Trabajo</a>
+                    <a href="#"><i class="menu-icon">📅</i> Calendario</a>
+                    <a href="#"><i class="menu-icon">📊</i> Análisis IA</a>
+                    <a href="#"><i class="menu-icon">⚙️</i> Configuración</a>
+                    <div class="menu-divider"></div>
+                    <a href="#" class="logout"><i class="menu-icon">🚪</i> Cerrar Sesión</a>
+                </div>
+            </div>
+        </div>
+    </header>
+    <div class="chat-container">
+        <h1 class="chat-title">IA Chat</h1>
+        <div class="chat-box">
+            <div class="chat-messages">
+                <div class="message ai">
+                    <div class="message-content">
+                        ¡Hola! ¿Qué quieres saber?
+                    </div>
+                </div>
+            </div>
+            <form class="chat-input" onsubmit="return handleSubmit(event)">
+                <input type="text" id="chat-input" placeholder="Haz tus preguntas sobre los sensores aquí...">
+                <button type="submit">→</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        function handleSubmit(event) {
+            event.preventDefault();
+            const input = document.getElementById('chat-input');
+            const question = input.value.trim();
+            
+            if (!question) return;
+
+            // Mostrar mensaje del usuario
+            appendMessage(question, true);
+            input.value = '';
+            
+            // Mostrar indicador de carga
+            const loadingDiv = document.createElement('div');
+            loadingDiv.className = 'message ai loading';
+            loadingDiv.innerHTML = '<div class="message-content">Procesando...</div>';
+            document.querySelector('.chat-messages').appendChild(loadingDiv);
+            
+            fetch('http://localhost:3000/api/chat', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ question })
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`Error en la solicitud: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                // Eliminar indicador de carga
+                document.querySelector('.chat-messages').removeChild(loadingDiv);
+                
+                if (data.message) {
+                    appendMessage(data.message);
+                } else {
+                    throw new Error('No se recibió una respuesta válida del servidor');
+                }
+            })
+            .catch(error => {
+                // Eliminar indicador de carga si aún existe
+                if (document.contains(loadingDiv)) {
+                    document.querySelector('.chat-messages').removeChild(loadingDiv);
+                }
+                appendMessage(`❌ Error: ${error.message}`);
+            });
+        }
+
+        function appendMessage(text, isUser = false) {
+            const messagesDiv = document.querySelector('.chat-messages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = isUser ? 'message user' : 'message ai';
+            
+            const contentDiv = document.createElement('div');
+            contentDiv.className = 'message-content';
+
+            // Si el mensaje es del bot, procesamos posibles caracteres especiales
+            if (!isUser) {
+                // Asegurarnos de que los emojis se muestren correctamente
+                text = text
+                    .replace(/\\n/g, '<br>')
+                    .replace(/\\t/g, '&emsp;')
+                    // Mejorar el formato de las cajas
+                    .replace(/═+/g, '<hr class="separator">')
+                    // Asegurar que los emojis se muestren correctamente
+                    .replace(/([\u{1F300}-\u{1F6FF}])/gu, '<span class="emoji">$1</span>')
+                    // Dar formato a los estados
+                    .replace(/(CRÍTICO|ALERTA|NORMAL)/g, '<span class="status-$1">$1</span>')
+                    // Resaltar valores numéricos
+                    .replace(/(\d+\.?\d*)\s*(°C|m\/s²|%)/g, '<span class="value">$1</span> <span class="unit">$2</span>');
+            }
+
+            contentDiv.innerHTML = text;
+            messageDiv.appendChild(contentDiv);
+            messagesDiv.appendChild(messageDiv);
+            
+            // Scroll al último mensaje
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        }
+
+        // Mantener el código del menú de usuario
+        function toggleUserMenu() {
+            const menu = document.querySelector('.user-menu');
+            menu.classList.toggle('show');
+        }
+
+        document.addEventListener('click', function(event) {
+            const menu = document.querySelector('.user-menu');
+            const button = document.querySelector('.user-button');
+            if (!menu.contains(event.target) && !button.contains(event.target)) {
+                menu.classList.remove('show');
+            }
+        });
+
+        // Agrega los estilos necesarios para el renderizado mejorado
+        function addCustomChatStyles() {
+            const style = document.createElement('style');
+            style.textContent = `
+                .bot-message {
+                    white-space: normal;
+                    font-family: 'Courier New', monospace;
+                    line-height: 1.4;
+                    background-color: #f8f9fa;
+                    border-radius: 10px;
+                    padding: 12px 15px;
+                    max-width: 90%;
+                    position: relative;
+                    box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+                }
+                
+                .section-title {
+                    color: #0056b3;
+                    font-weight: bold;
+                    background-color: #e7f1ff;
+                    padding: 2px 4px;
+                    border-radius: 4px;
+                }
+                
+                .box-top, .box-bottom, .box-side, .box-mid, .box-line {
+                    color: #6c757d;
+                    font-weight: normal;
+                }
+                
+                .critical { color: #dc3545; font-weight: bold; }
+                .warning { color: #fd7e14; font-weight: bold; }
+                .normal { color: #28a745; font-weight: bold; }
+                
+                .emoji {
+                    font-size: 1.2em;
+                    margin-right: 2px;
+                }
+                
+                .sensor-value {
+                    color: #0056b3;
+                    font-weight: bold;
+                }
+                
+                .sensor-unit {
+                    color: #6c757d;
+                    font-size: 0.9em;
+                }
+                
+                .messages-container {
+                    height: 500px;
+                    overflow-y: auto;
+                    padding: 15px;
+                    background-color: #fff;
+                    border-radius: 8px;
+                    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+                }
+                
+                .user-message {
+                    background-color: #e7f1ff;
+                    padding: 10px 15px;
+                    border-radius: 18px;
+                    margin: 5px 0 15px auto;
+                    max-width: 70%;
+                    text-align: right;
+                    box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+                    font-weight: 500;
+                }
+            `;
+            document.head.appendChild(style);
+        }
+
+        // Llamamos a la función para añadir los estilos cuando cargue la página
+        document.addEventListener('DOMContentLoaded', function() {
+            addCustomChatStyles();
+            
+            // Resto del código de inicialización...
+        });
+    </script>
+</body>
+</html> 
