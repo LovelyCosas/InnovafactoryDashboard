@@ -32,13 +32,14 @@ Frontend:
 - HTML5
 - CSS3
 - JavaScript (ES6+)
-- Chart.js para gráficos
-- WebSocket para actualizaciones en tiempo real
+-React.js
+-Chart.js y react-chartjs-2 para gráficos
+-Fetch API para comunicación con el backend
 
 Backend:
 - Node.js
 - Express.js
-- WebSocket para comunicación bidireccional
+- API RESTful
 
 ESTRUCTURA DEL PROYECTO
 ----------------------
@@ -97,10 +98,10 @@ Pasos de Instalación:
 3. Instalar dependencias del frontend:
    cd ../frontend
    npm install
-
+   npm install chart.js react-chartjs-2   <---- para la visualización de los gráficos
 4. Configurar variables de entorno:
    cp .env.example .env
-   (Editar el archivo .env con tus configuraciones)
+   (Editar el archivo .env con tus configuraciones)<--- no es necesario si solo quieres probar con las que ya están
 
 5. Iniciar el servidor de desarrollo:
    # En la carpeta backend
@@ -131,38 +132,44 @@ Alertas:
 - Se categorizan por nivel de severidad (Normal, Alerta, Crítico)
 - Incluyen recomendaciones específicas para cada situación
 
-Acciones Recomendadas:
+Preguntas recomendadas a la "IA":
 
-1. Temperatura Alta:
-   - Verificar sistema de refrigeración
-   - Aumentar ventilación
-   - Revisar carga de trabajo
+📊 Estado y Valores Actuales
+¿Cuál es el estado actual de los sensores?
+¿Qué valores tiene Vib_03?
+¿Cómo está la temperatura ahora?
+¿Cuál es el nivel de humedad actual?
+¿Hay alguna alerta activa?
+🔍 Análisis de Normalidad
+¿Es normal que Vib_02 tenga un valor de 0.85g?
+¿Está bien la temperatura a 75°C?
+¿Es correcto este nivel de humedad?
+¿Son normales estos valores?
+⚠️ Alertas y Problemas
+¿Hay algún problema con Vib_03?
+¿Qué hacer si la vibración supera 0.7g?
+¿Qué hacer si la temperatura está alta?
+¿Qué hacer si la humedad está baja?
+📈 Rangos Normales
+¿Cuáles son los rangos normales de vibración?
+¿Qué valores de temperatura son aceptables?
+¿Cuál es el rango ideal de humedad?
+🛠️ Mantenimiento
+¿Cuándo hacer mantenimiento preventivo?
+¿Qué revisar en Vib_03 si marca 1.0g?
+¿Cómo revisar la humedad en zona B?
+¿Qué hacer si hay sensores fuera de rango?
+🛡️ Prevención
+¿Cómo prevenir problemas de temperatura?
+¿Qué medidas preventivas tomar con la vibración?
+¿Cómo evitar problemas de humedad?
+¿Cómo prevenir fallos en los sensores?
+⚙️ Problemas Específicos
+¿Qué impacto tienen las vibraciones en los rodamientos?
+¿Qué problemas causa la temperatura a 90°C?
+¿Qué hacer si un sensor está mal?
+¿Qué efectos tiene la humedad alta en los equipos?
 
-2. Vibración Excesiva:
-   - Inspeccionar rodamientos
-   - Verificar alineación
-   - Revisar estado de la maquinaria
-
-3. Humedad Fuera de Rango:
-   - Ajustar sistema HVAC
-   - Verificar sellos
-   - Revisar ventilación
-
-CONTRIBUCIÓN
------------
-Si deseas contribuir al proyecto:
-1. Hacer fork del repositorio
-2. Crear una rama para tu feature (git checkout -b feature/AmazingFeature)
-3. Commit de tus cambios (git commit -m 'Add some AmazingFeature')
-4. Push a la rama (git push origin feature/AmazingFeature)
-5. Abrir un Pull Request
-
-
-
-LICENCIA
---------
-Este proyecto está bajo la Licencia MIT - ver el archivo LICENSE.txt para más 
-detalles.
 
 AUTORES
 -------

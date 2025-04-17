@@ -65,35 +65,29 @@ function App() {
       const res = await fetch('http://localhost:3000/api/sensors');
       const data = await res.json();
       const recent = data.filter(s =>
-        ['Temp_01', 'Vib_01', 'Hum_01'].includes(s.sensor_id)
+        ['Temp_01', 'Vib_01', 'Hum_01', 'Temp_02'].includes(s.sensor_id)
       ).map(s => ({
         id: s.sensor_id,
         value: s.value,
         unit: s.unit,
         time: new Date(s.timestamp).toLocaleTimeString()
       }));
-      setDisplayedRows(recent.slice(0, 3));
+      setDisplayedRows(recent.slice(0, 4));
     };
-
-    // Auto-scroll para los sensores
-    const scrollInterval = setInterval(() => {
-      setCurrentSensorIndex(prev => (prev + 1) % Math.max(sensors.length - 3, 1));
-    }, 3000);
 
     fetchData();
     fetchAlerts();
     updateDisplayedRows();
-    const sensorInterval = setInterval(fetchData, 5000);
+    const interval = setInterval(fetchData, 5000);
     const alertInterval = setInterval(fetchAlerts, 5000);
     const historyInterval = setInterval(updateDisplayedRows, 30000);
 
     return () => {
-      clearInterval(sensorInterval);
+      clearInterval(interval);
       clearInterval(alertInterval);
       clearInterval(historyInterval);
-      clearInterval(scrollInterval);
     };
-  }, [sensors.length]);
+  }, []);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -166,9 +160,9 @@ function App() {
     scales: { y: { beginAtZero: false } }
   };
 
-  // Filtrar sensores por zona y mostrar solo 4 a la vez
-  const filteredSensors = sensors.filter(s => s.zone === selectedZone);
-  const visibleSensors = filteredSensors.slice(currentSensorIndex, currentSensorIndex + 4);
+  const filteredSensors = sensors
+    .filter(s => s.zone === selectedZone)
+    .slice(0, 4);
 
   const formatNumber = (value) => {
     return Number(value).toLocaleString('es-ES', {
@@ -216,8 +210,8 @@ function App() {
 
       <div className="sensor-carrusel">
         <div className="scrolling-strip">
-          {visibleSensors.map((s, i) => (
-            <div className={`sensor-card ${s.status === 'ALERT' ? 'alert' : ''}`} key={i}>
+          {filteredSensors.map((s, i) => (
+            <div className={`sensor-card ${s.status === 'ALERT' ? 'alert' : s.status === 'CRITICAL' ? 'critical' : ''}`} key={i}>
               <p>{s.sensor_id}</p>
               <h2>{formatNumber(s.value)} {s.unit === 'g' ? 'm/s²' : s.unit}</h2>
               <span className={`status ${s.status.toLowerCase()}`}>{s.status}</span>
@@ -270,11 +264,8 @@ function App() {
             <select onChange={(e) => setSelectedZone(e.target.value)} value={selectedZone}>
               <option>Almacén A</option>
               <option>Zona B</option>
-              <option>Zona C</option>
               <option>Motor A</option>
               <option>Motor B</option>
-              <option>Horno A</option>
-              <option>Zona Técnica</option>
             </select>
           </div>
 

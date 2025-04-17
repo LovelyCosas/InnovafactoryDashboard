@@ -1,11 +1,20 @@
 // @charset "UTF-8"
 // Datos simulados iniciales
 let readings = [
+  // Almacén A - 4 sensores (2 temp, 1 vib, 1 hum)
   {
     sensor_id: 'Temp_01',
     value: 78.6,
     unit: '°C',
     status: 'OK',
+    zone: 'Almacén A',
+    timestamp: new Date()
+  },
+  {
+    sensor_id: 'Temp_02',  // Sensor que siempre estará en alerta
+    value: 84.3,
+    unit: '°C',
+    status: 'ALERT',
     zone: 'Almacén A',
     timestamp: new Date()
   },
@@ -25,25 +34,39 @@ let readings = [
     zone: 'Almacén A',
     timestamp: new Date()
   },
+  // Motor A - 4 sensores
   {
-    sensor_id: 'Temp_02',
-    value: 82.5,
+    sensor_id: 'Temp_03',
+    value: 77.5,
     unit: '°C',
-    status: 'ALERT',
+    status: 'OK',
     zone: 'Motor A',
     timestamp: new Date()
   }
 ];
 
-// Generar 6 sensores más para tener 10 en total
+// Configuración completa de sensores adicionales
 const additionalSensors = [
-  { id: 'Temp_03', zone: 'Zona B', unit: '°C' },
-  { id: 'Vib_02', zone: 'Zona B', unit: 'm/s²' },
-  { id: 'Hum_02', zone: 'Zona B', unit: '%' },
-  { id: 'Temp_04', zone: 'Motor B', unit: '°C' },
-  { id: 'Vib_03', zone: 'Motor B', unit: 'm/s²' },
-  { id: 'Temp_05', zone: 'Horno A', unit: '°C' }
-].forEach(sensor => {
+  // Motor A (completar 4 sensores)
+  { id: 'Temp_03B', zone: 'Motor A', unit: '°C' },
+  { id: 'Vib_02', zone: 'Motor A', unit: 'm/s²' },
+  { id: 'Hum_02', zone: 'Motor A', unit: '%' },
+  
+  // Zona B (4 sensores)
+  { id: 'Temp_04', zone: 'Zona B', unit: '°C' },
+  { id: 'Temp_04B', zone: 'Zona B', unit: '°C' },
+  { id: 'Vib_03', zone: 'Zona B', unit: 'm/s²' },
+  { id: 'Hum_03', zone: 'Zona B', unit: '%' },
+  
+  // Motor B (4 sensores)
+  { id: 'Temp_05', zone: 'Motor B', unit: '°C' },
+  { id: 'Temp_05B', zone: 'Motor B', unit: '°C' },
+  { id: 'Vib_04', zone: 'Motor B', unit: 'm/s²' },
+  { id: 'Hum_04', zone: 'Motor B', unit: '%' }
+];
+
+// Añadir los sensores adicionales con valores iniciales apropiados
+additionalSensors.forEach(sensor => {
   readings.push({
     sensor_id: sensor.id,
     value: sensor.unit === '°C' ? 75 + Math.random() * 10 : 
@@ -85,18 +108,64 @@ const formatDate = (timestamp) => {
   }
 };
 
+// Función para determinar el estado del sensor
+const determineStatus = (value, unit) => {
+  if (unit === '°C') {
+    if (value > 85) return 'CRITICAL';
+    if (value > 80) return 'ALERT';
+    return 'OK';
+  }
+  if (unit === 'm/s²') {
+    if (value > 0.9) return 'CRITICAL';
+    if (value > 0.7) return 'ALERT';
+    return 'OK';
+  }
+  if (unit === '%') {
+    if (value > 60 || value < 35) return 'ALERT';
+    return 'OK';
+  }
+  return 'OK';
+};
+
 // Función para actualizar valores simulados
 const updateReadings = () => {
   const currentTime = new Date();
-  readings = readings.map(reading => ({
-    ...reading,
-    value: reading.unit === '°C' ? 
-           reading.value + (Math.random() - 0.5) * 2 :
-           reading.unit === 'm/s²' ? 
-           Math.max(0, reading.value + (Math.random() - 0.5) * 0.1) :
-           Math.max(0, Math.min(100, reading.value + (Math.random() - 0.5) * 5)),
-    timestamp: currentTime
-  }));
+  readings = readings.map(reading => {
+    let newValue;
+    if (reading.sensor_id === 'Temp_02') {
+      // Hacer que Temp_02 varíe pero nunca baje de 84.3°C
+      const randomVariation = (Math.random() - 0.3) * 2;
+      newValue = Math.max(84.3, reading.value + randomVariation);
+    } else {
+      newValue = reading.unit === '°C' ? 
+                reading.value + (Math.random() - 0.5) * 2 :
+                reading.unit === 'm/s²' ? 
+                Math.max(0, reading.value + (Math.random() - 0.5) * 0.1) :
+                Math.max(0, Math.min(100, reading.value + (Math.random() - 0.5) * 5));
+    }
+
+    // Actualizar el estado basado en el nuevo valor
+    const newStatus = determineStatus(newValue, reading.unit);
+
+    return {
+      ...reading,
+      value: newValue,
+      status: newStatus,
+      timestamp: currentTime
+    };
+  });
+
+  // Actualizar alertas - incluir todos los sensores en estado ALERT o CRITICAL
+  alerts = readings
+    .filter(r => r.status === 'ALERT' || r.status === 'CRITICAL')
+    .map(r => ({
+      sensor_id: r.sensor_id,
+      value: r.value,
+      unit: r.unit,
+      zone: r.zone,
+      timestamp: currentTime,
+      status: r.status
+    }));
 
   // Guardar lecturas en el historial
   const newReadings = readings.map(reading => ({
@@ -106,18 +175,6 @@ const updateReadings = () => {
   }));
   
   readingsHistory = [...newReadings, ...readingsHistory].slice(0, MAX_HISTORY);
-
-  // Actualizar alertas
-  alerts = readings
-    .filter(r => (r.unit === '°C' && r.value > 80) || 
-                 (r.unit === 'm/s²' && r.value > 0.8))
-    .map(r => ({
-      sensor_id: r.sensor_id,
-      value: r.value,
-      unit: r.unit,
-      zone: r.zone,
-      timestamp: currentTime
-    }));
 };
 
 // Actualizar lecturas cada 5 segundos
